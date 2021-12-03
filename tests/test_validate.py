@@ -8,9 +8,9 @@ from src.python_dhl.resources import address, helper, shipment
 
 class TestDhl(unittest.TestCase):
     def test_validate(self):
-        service = dhl.DHLService(api_key=Config.DHL_API_KEY, api_secret=Config.DHL_API_SECRET,
-                                 account_number=Config.DHL_ACCOUNT_EXPORT,
-                                 import_account_number=Config.DHL_ACCOUNT_IMPORT,
+        service = dhl.DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SECRET,
+                                 account_number=Setting.DHL_ACCOUNT_EXPORT,
+                                 import_account_number=Setting.DHL_ACCOUNT_IMPORT,
                                  test_mode=True)
 
         addr = address.DHLAddress(
@@ -21,14 +21,14 @@ class TestDhl(unittest.TestCase):
             city='Thiene',
         )
 
-        validate = service.validate_address(addr, helper.TypeOfShipment.DELIVERY)
-        # print(validate)
+        validate = service.validate_address(addr, helper.ShipmentType.DELIVERY)
+        print(validate)
         self.assertIn('address', validate)
 
     def test_shipment(self):
-        service = dhl.DHLService(api_key=Config.DHL_API_KEY, api_secret=Config.DHL_API_SECRET,
-                                 account_number=Config.DHL_ACCOUNT_EXPORT,
-                                 import_account_number=Config.DHL_ACCOUNT_IMPORT,
+        service = dhl.DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SECRET,
+                                 account_number=Setting.DHL_ACCOUNT_EXPORT,
+                                 import_account_number=Setting.DHL_ACCOUNT_IMPORT,
                                  test_mode=True)
 
         registration = address.DHLRegistrationNumber(

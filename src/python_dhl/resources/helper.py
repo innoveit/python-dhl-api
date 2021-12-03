@@ -3,7 +3,7 @@ from enum import Enum
 from time import timezone
 
 
-class TypeOfShipment(Enum):
+class ShipmentType(Enum):
     DELIVERY = 'delivery'
     PICKUP = 'pickup'
 
