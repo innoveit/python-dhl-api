@@ -58,4 +58,8 @@ class DHLPerson(DHLCompany):
     def __init__(self, full_name, phone,
                  street_line, city, postal_code, province_code, country_code,
                  county_name=None, street_line2=None, street_line3=None, email=None):
-        DHLAddress.__init__(self, full_name, full_name, phone, street_line, city, postal_code, country_code, street_line2, street_line3, email)
+        DHLAddress.__init__(self, street_line, city, postal_code, province_code, country_code, county_name, street_line2, street_line3)
+
+        self.full_name = full_name
+        self.phone = phone
+        self.email = email

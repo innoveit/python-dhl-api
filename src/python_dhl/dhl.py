@@ -1,9 +1,11 @@
-import datetime
 import logging
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import requests
 from requests.auth import HTTPBasicAuth
+
+from src.python_dhl.resources.response import DHLShipmentResponse
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +39,29 @@ class DHLService:
         )
         return response.json()
 
+    def get_rates(self, sender, receiver, product, shipment_date, with_customs='false', unit_of_measurement='metric'):
+        dhl_ship_date = datetime.strftime(shipment_date, '%Y-%m-%d')
+        params = {
+            'accountNumber': self.account_number,
+            'originCountryCode': sender.country_code,
+            'originCityName': sender.city,
+            'destinationCountryCode': receiver.country_code,
+            'destinationCityName': receiver.city,
+            'weight': product.weight,
+            'length': product.length,
+            'width': product.width,
+            'height': product.height,
+            'plannedShippingDate': dhl_ship_date,
+            'isCustomsDeclarable': with_customs,
+            'unitOfMeasurement': unit_of_measurement
+        }
+        response = requests.get(
+            self.endpoint_url + '/rates', params=params,
+            auth=HTTPBasicAuth(self.api_key, self.api_secret)
+        )
+
+        return response.json()
+
     def ship(self, dhl_shipment):
         """
         TODO
@@ -45,29 +70,47 @@ class DHLService:
         """
         try:
             shipment = self._create_shipment(dhl_shipment)
-            response = requests.post(
+            dhl_response = requests.post(
                 self.endpoint_url + '/shipments', json=shipment,
                 auth=HTTPBasicAuth(self.api_key, self.api_secret)
             )
-            return response.json()
+            if 'detail' in dhl_response.json():
+                response = DHLShipmentResponse(
+                    success=False,
+                    #tracking_numbers=tracking_numbers,
+                    #identification_number=identification_number,
+                    #label_bytes=label_bytes,
+                    #dispatch_number=dispatch_number
+                )
+            else:
+                response = DHLShipmentResponse(
+                    success=True,
+                    # tracking_numbers=tracking_numbers,
+                    # identification_number=identification_number,
+                    # label_bytes=label_bytes,
+                    # dispatch_number=dispatch_number
+                )
+            return response
         except TypeError as err:
-            logger.error('Errore andata_dhl ' + repr(err))
-            return None
+            return DHLShipmentResponse(
+                success=False,
+                errors=['No PDF label.']
+            )
 
     def _create_shipment(self, dhl_shipment):
-        next_day = datetime.strftime(self.ship_datetime, '%d/%m/%Y %H:%M')
+        next_day = datetime.strftime(dhl_shipment.ship_datetime, '%d/%m/%Y %H:%M')
 
-        data_scelta = datetime.strptime(next_day, '%d/%m/%Y %H:%M')
-        data_scelta = data_scelta.replace(tzinfo=ZoneInfo('Europe/Rome'))
+        ship_date = datetime.strptime(next_day, '%d/%m/%Y %H:%M')
+        ship_date = ship_date.replace(tzinfo=ZoneInfo('Europe/Rome'))
 
-        data_dhl = datetime.strftime(data_scelta, '%Y-%m-%dT%H:%M:%S GMT%z')
-        data_dhl = "{0}:{1}".format(
-            data_dhl[:-2],
-            data_dhl[-2:]
+        dhl_ship_date = datetime.strftime(ship_date, '%Y-%m-%dT%H:%M:%S GMT%z')
+        dhl_ship_date = "{0}:{1}".format(
+            dhl_ship_date[:-2],
+            dhl_ship_date[-2:]
         )
 
         json_data = {
-            "plannedShippingDateAndTime": data_dhl,
+            "plannedShippingDateAndTime": dhl_ship_date,
             "pickup": {
                 "isRequested": False,
                 "closeTime": "18:00",
@@ -80,8 +123,8 @@ class DHLService:
                         "provinceCode": dhl_shipment.sender.province_code,
                         "countyName": dhl_shipment.sender.county_name,
                         "addressLine1": dhl_shipment.sender.street_line,
-                        "addressLine2": dhl_shipment.sender.street_line1,
-                        "addressLine3": dhl_shipment.sender.street_line2
+                        "addressLine2": dhl_shipment.sender.street_line2,
+                        "addressLine3": dhl_shipment.sender.street_line3
                     },
                     "contactInformation": {
                         "email": dhl_shipment.sender.email,
@@ -141,27 +184,27 @@ class DHLService:
                 },
                 "receiverDetails": {
                     "postalAddress": {
-                        "postalCode": ordine.indirizzo_spedizione.cap,
-                        "cityName": ordine.indirizzo_spedizione.citta,
-                        "countryCode": ordine.indirizzo_spedizione.codice_stato,
-                        "provinceCode": ordine.indirizzo_spedizione.provincia,
-                        "addressLine1": ordine.indirizzo_spedizione.indirizzo,
+                        "postalCode": dhl_shipment.receiver.postal_code,
+                        "cityName": dhl_shipment.receiver.city,
+                        "countryCode": dhl_shipment.receiver.country_code,
+                        "provinceCode": dhl_shipment.receiver.province_code,
+                        "addressLine1": dhl_shipment.receiver.street_line,
                     },
                     "contactInformation": {
-                        "email": ordine.indirizzo_spedizione.email,
-                        "phone": ordine.indirizzo_spedizione.phone,
-                        "companyName": ordine.indirizzo_spedizione.nome_completo,
-                        "fullName": ordine.indirizzo_spedizione.nome_completo
+                        "email": dhl_shipment.receiver.email,
+                        "phone": dhl_shipment.receiver.phone,
+                        "companyName": dhl_shipment.receiver.full_name,
+                        "fullName": dhl_shipment.receiver.full_name
                     },
                     "typeCode": "private"
                 },
             },
             "customerReferences": [{
-                "value": ordine.stampa_numero_ordine
+                "value": 1
             }, {
-                "value": stagione
+                "value": 'stagione'
             }],
-            "content": contenuto
+            "content": dhl_shipment.content
         }
 
         return json_data
