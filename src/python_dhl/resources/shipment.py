@@ -52,7 +52,7 @@ class DHLAddedService:
 
 class DHLShipmentContent:
     def __init__(self, packages, is_custom_declarable, description, incoterm_code, unit_of_measurement,
-                 declared_value=None, declared_value_currency=None):
+                 declared_value=None, declared_value_currency=None, product_code=None):
         self.packages = packages
         self.is_custom_declarable = is_custom_declarable
         self.description = description
@@ -60,6 +60,7 @@ class DHLShipmentContent:
         self.unit_of_measurement = unit_of_measurement
         self.declared_value = declared_value
         self.declared_value_currency = declared_value_currency
+        self.product_code = product_code
 
     def to_dict(self):
         dict = {
@@ -75,9 +76,23 @@ class DHLShipmentContent:
             dict['declaredValueCurrency'] = self.declared_value_currency
         return dict
 
+    def to_dict_pickup(self):
+        dict = {
+            'productCode': self.product_code,
+            'packages': self.packages,
+            'isCustomsDeclarable': self.is_custom_declarable,
+            'unitOfMeasurement': self.unit_of_measurement,
+        }
+        if self.declared_value:
+            dict['declaredValue'] = self.declared_value
+        if self.declared_value_currency:
+            dict['declaredValueCurrency'] = self.declared_value_currency
+        return dict
+
 
 class DHLShipmentOutput:
-    def __init__(self, dpi, logo_file_format, logo_file_base64, encoding_format='pdf', split_transport_and_waybill_doc_labels=True,
+    def __init__(self, dpi, logo_file_format, logo_file_base64, encoding_format='pdf',
+                 split_transport_and_waybill_doc_labels=True,
                  all_documents_in_one_image=True, split_documents_by_pages=True, split_invoice_and_receipt=True):
         self.dpi = dpi
         self.logo_file_format = logo_file_format
@@ -105,7 +120,8 @@ class DHLShipmentOutput:
 
 class DHLShipment:
     def __init__(self, sender_contact, sender_address, receiver_contact, receiver_address, ship_datetime,
-                 product_code, added_services, content, output_format, account_type='shipper', sender_registration_numbers=None,
+                 product_code, added_services, content, output_format, account_type='shipper',
+                 customer_references=None, sender_registration_numbers=None,
                  request_pickup=False, pickup_close_time=None, pickup_location=None):
         self.sender_contact = sender_contact
         self.sender_address = sender_address
@@ -121,3 +137,17 @@ class DHLShipment:
         self.pickup_location = pickup_location
         self.account_type = account_type
         self.output_format = output_format
+        self.customer_references = customer_references
+
+
+class DHLPickup:
+    def __init__(self, sender_contact, sender_address, receiver_contact, receiver_address, pickup_datetime,
+                 content, account_type='shipper', sender_registration_numbers=None):
+        self.sender_contact = sender_contact
+        self.sender_address = sender_address
+        self.sender_registration_numbers = sender_registration_numbers
+        self.receiver_contact = receiver_contact
+        self.receiver_address = receiver_address
+        self.pickup_datetime = pickup_datetime
+        self.content = content
+        self.account_type = account_type
