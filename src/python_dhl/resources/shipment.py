@@ -1,6 +1,8 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from src.python_dhl.resources.helper import ShipperType
+
 
 class DHLProduct:
     def __init__(self, weight, length, width, height):
@@ -120,8 +122,8 @@ class DHLShipmentOutput:
 
 class DHLShipment:
     def __init__(self, sender_contact, sender_address, receiver_contact, receiver_address, ship_datetime,
-                 product_code, added_services, content, output_format, account_type='shipper',
-                 customer_references=None, sender_registration_numbers=None,
+                 product_code, added_services, content, output_format, shipper_type,
+                 account_type='shipper', customer_references=None, sender_registration_numbers=None,
                  request_pickup=False, pickup_close_time=None, pickup_location=None):
         self.sender_contact = sender_contact
         self.sender_address = sender_address
@@ -138,6 +140,7 @@ class DHLShipment:
         self.account_type = account_type
         self.output_format = output_format
         self.customer_references = customer_references
+        self.shipper_type = shipper_type
 
 
 class DHLPickup:
@@ -150,4 +153,27 @@ class DHLPickup:
         self.receiver_address = receiver_address
         self.pickup_datetime = pickup_datetime
         self.content = content
+        self.account_type = account_type
+
+
+class DHLDocumentImage:
+    def __init__(self, type_code, image_format, content):
+        self.type_code = type_code
+        self.image_format = image_format
+        self.content = content
+
+    def to_dict(self):
+        return {
+            'typeCode': self.type_code,
+            'imageFormat': self.image_format.upper(),
+            'content': self.content
+        }
+
+
+class DHLDocument:
+    def __init__(self, tracking_number, original_planned_shipping_date, product_code, document_images, account_type='shipper'):
+        self.tracking_number = tracking_number
+        self.original_planned_shipping_date = original_planned_shipping_date
+        self.product_code = product_code
+        self.document_images = document_images
         self.account_type = account_type

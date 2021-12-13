@@ -12,6 +12,15 @@ class ShipmentType(Enum):
     PICKUP = 'pickup'
 
 
+class ShipperType(Enum):
+    BUSINESS = 'business'
+    DIRECT_CONSUMER = 'direct_consumer'
+    GOVERNMENT = 'government'
+    OTHER = 'other'
+    PRIVATE = 'private'
+    RESELLER = 'reseller'
+
+
 class TypeCode(Enum):
     VAT = 'Value-Added tax'
     EIN = 'Employer Identification Number'

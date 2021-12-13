@@ -5,7 +5,8 @@ from zoneinfo import ZoneInfo
 import requests
 from requests.auth import HTTPBasicAuth
 
-from src.python_dhl.resources.response import DHLShipmentResponse, DHLPickupResponse
+from src.python_dhl.resources.response import DHLShipmentResponse, DHLPickupResponse, DHLResponse, DHLUploadResponse, \
+    DHLTrackingResponse, DHLRatesResponse, DHLValidateAddressResponse
 
 logger = logging.getLogger(__name__)
 
@@ -26,41 +27,98 @@ class DHLService:
         self.endpoint_url = self.dhl_endpoint_test if test_mode else self.dhl_endpoint
 
     def validate_address(self, address, shipment_type):
-        params = {
-            'type': shipment_type,
-            'strictValidation': 'true',
-            "postalCode": address.postal_code,
-            "cityName": address.city,
-            "countryCode": address.country_code,
-        }
-        response = requests.get(
-            self.endpoint_url + '/address-validate', params,
-            auth=HTTPBasicAuth(self.api_key, self.api_secret)
-        )
-        return response.json()
+        try:
+            params = {
+                'type': shipment_type,
+                'strictValidation': 'true',
+                "postalCode": address.postal_code,
+                "cityName": address.city,
+                "countryCode": address.country_code,
+            }
+            dhl_response = requests.get(
+                self.endpoint_url + '/address-validate', params,
+                auth=HTTPBasicAuth(self.api_key, self.api_secret)
+            )
+            response = DHLValidateAddressResponse(
+                success=True,
+            )
+            for attribute, value in dhl_response.json().items():
+                if attribute == 'address':
+                    response.address = value
+                if attribute == 'warnings':
+                    response.warnings = value
+            return response
+        except Exception as err:
+            return DHLValidateAddressResponse(
+                success=False,
+                error_title='No address found.'
+            )
 
     def get_rates(self, sender, receiver, product, shipment_date, with_customs='false', unit_of_measurement='metric'):
-        dhl_ship_date = datetime.strftime(shipment_date, '%Y-%m-%d')
-        params = {
-            'accountNumber': self.account_number,
-            'originCountryCode': sender.country_code,
-            'originCityName': sender.city,
-            'destinationCountryCode': receiver.country_code,
-            'destinationCityName': receiver.city,
-            'weight': product.weight,
-            'length': product.length,
-            'width': product.width,
-            'height': product.height,
-            'plannedShippingDate': dhl_ship_date,
-            'isCustomsDeclarable': with_customs,
-            'unitOfMeasurement': unit_of_measurement
-        }
-        response = requests.get(
-            self.endpoint_url + '/rates', params=params,
-            auth=HTTPBasicAuth(self.api_key, self.api_secret)
-        )
+        try:
+            dhl_ship_date = datetime.strftime(shipment_date, '%Y-%m-%d')
+            params = {
+                'accountNumber': self.account_number,
+                'originCountryCode': sender.country_code,
+                'originCityName': sender.city,
+                'destinationCountryCode': receiver.country_code,
+                'destinationCityName': receiver.city,
+                'weight': product.weight,
+                'length': product.length,
+                'width': product.width,
+                'height': product.height,
+                'plannedShippingDate': dhl_ship_date,
+                'isCustomsDeclarable': with_customs,
+                'unitOfMeasurement': unit_of_measurement
+            }
+            dhl_response = requests.get(
+                self.endpoint_url + '/rates', params=params,
+                auth=HTTPBasicAuth(self.api_key, self.api_secret)
+            )
+            response = DHLRatesResponse(
+                success=True,
+                products=dhl_response.json()['products'],
+            )
+            return response
+        except Exception as err:
+            return DHLRatesResponse(
+                success=False,
+                error_title='No rates found.'
+            )
 
-        return response.json()
+    def get_tracking(self, tracking_number):
+        try:
+            dhl_response = requests.get(
+                self.endpoint_url + '/shipments' + str(tracking_number) + '/tracking',
+                auth=HTTPBasicAuth(self.api_key, self.api_secret)
+            )
+            response = DHLTrackingResponse(
+                success=True,
+                shipments=dhl_response.json()['shipments'],
+            )
+            return response
+        except Exception as err:
+            return DHLTrackingResponse(
+                success=False,
+                error_title='No shipments found.'
+            )
+
+    def check_shipment(self, tracking_number):
+        try:
+            dhl_response = requests.get(
+                self.endpoint_url + '/shipments' + str(tracking_number) + '/proof-of-delivery',
+                auth=HTTPBasicAuth(self.api_key, self.api_secret)
+            )
+            response = DHLUploadResponse(
+                success=True,
+                documents=dhl_response.json()['documents'],
+            )
+            return response
+        except Exception as err:
+            return DHLUploadResponse(
+                success=False,
+                error_title='No electronic proof of delivery found.'
+            )
 
     def ship(self, dhl_shipment):
         """
@@ -107,7 +165,7 @@ class DHLService:
                     documents_bytes=dhl_response.json()['documents'],
                 )
             return response
-        except TypeError as err:
+        except Exception as err:
             return DHLShipmentResponse(
                 success=False,
                 error_detail=['No label.']
@@ -132,7 +190,7 @@ class DHLService:
                 "pickupDetails": {
                     "postalAddress": dhl_shipment.sender_address.to_dict(),
                     "contactInformation": dhl_shipment.sender_contact.to_dict(),
-                    "typeCode": "business"
+                    "typeCode": dhl_shipment.shipper_type
                 },
             },
             "productCode": dhl_shipment.product_code,
@@ -181,8 +239,8 @@ class DHLService:
             json_data['pickup']['pickupDetails']['postalAddress']['countyName'] = dhl_shipment.sender.county_name
         if dhl_shipment.customer_references:
             references = []
-            for r in dhl_shipment.customer_references:
-                references.append({'value': r})
+            for cr in dhl_shipment.customer_references:
+                references.append({'value': cr})
             json_data['customerReferences'] = references
 
         return json_data
@@ -231,7 +289,7 @@ class DHLService:
                     if attribute == 'warnings':
                         response.warnings = value
             return response
-        except TypeError as err:
+        except Exception as err:
             return DHLPickupResponse(
                 success=False
             )
@@ -266,3 +324,39 @@ class DHLService:
         }
 
         return json_data
+
+    def upload_customs_document(self, dhl_document):
+        try:
+            original_planned_shipping_date = datetime.strftime(dhl_document.original_planned_shipping_date, '%Y-%m-%d')
+            document_data = {
+                "shipmentTrackingNumber": dhl_document.tracking_number,
+                "originalPlannedShippingDate": original_planned_shipping_date,
+                "productCode": dhl_document.product_code,
+                "accounts": [
+                    {
+                        "typeCode": dhl_document.account_type,
+                        "number": self.account_number
+                    }
+                ],
+            }
+            if dhl_document.document_images:
+                document_images = []
+                for d in dhl_document.document_images:
+                    document_images.append(d.to_dict())
+                document_data['document_images'] = document_images
+            dhl_response = requests.post(
+                self.endpoint_url + '/shipments/' + dhl_document.tracking_number + '/upload-image',
+                json=document_data,
+                auth=HTTPBasicAuth(self.api_key, self.api_secret)
+            )
+            response = DHLResponse(
+                success=True,
+            )
+            for attribute, value in dhl_response.json().items():
+                if attribute == 'status':
+                    response.status = value
+            return response
+        except Exception as err:
+            return DHLResponse(
+                success=False
+            )
