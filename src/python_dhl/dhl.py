@@ -155,8 +155,8 @@ class DHLService:
                     error_title=error_title,
                     error_detail=error_detail,
                     additional_error_details=additional_error_details,
-                    message = message,
-                    status = status
+                    message=message,
+                    status=status
                 )
             else:
                 response = DHLShipmentResponse(

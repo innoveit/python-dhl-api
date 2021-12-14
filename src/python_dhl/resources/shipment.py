@@ -65,8 +65,11 @@ class DHLShipmentContent:
         self.product_code = product_code
 
     def to_dict(self):
+        packages = []
+        for p in self.packages:
+            packages.append(p.to_dict())
         dict = {
-            'packages': self.packages,
+            'packages': packages,
             'isCustomsDeclarable': self.is_custom_declarable,
             'description': self.description,
             'incoterm': self.incoterm_code,
@@ -79,9 +82,12 @@ class DHLShipmentContent:
         return dict
 
     def to_dict_pickup(self):
+        packages = []
+        for p in self.packages:
+            packages.append(p.to_dict())
         dict = {
             'productCode': self.product_code,
-            'packages': self.packages,
+            'packages': packages,
             'isCustomsDeclarable': self.is_custom_declarable,
             'unitOfMeasurement': self.unit_of_measurement,
         }
