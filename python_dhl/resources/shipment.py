@@ -1,9 +1,3 @@
-from datetime import datetime
-from zoneinfo import ZoneInfo
-
-from src.python_dhl.resources.helper import ShipperType
-
-
 class DHLProduct:
     def __init__(self, weight, length, width, height):
         self.weight = weight

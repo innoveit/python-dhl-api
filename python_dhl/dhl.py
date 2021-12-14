@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 import requests
 from requests.auth import HTTPBasicAuth
 
-from src.python_dhl.resources.response import DHLShipmentResponse, DHLPickupResponse, DHLResponse, DHLUploadResponse, \
+from python_dhl.resources.response import DHLShipmentResponse, DHLPickupResponse, DHLResponse, DHLUploadResponse, \
     DHLTrackingResponse, DHLRatesResponse, DHLValidateAddressResponse
 
 logger = logging.getLogger(__name__)

@@ -1,13 +1,12 @@
 # to run tests: python -m unittest discover -s tests
 
 import unittest
-from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from config import Setting
-from src.python_dhl import dhl
-from src.python_dhl.resources import address, shipment
-from src.python_dhl.resources.helper import ProductCode, ShipmentType, TypeCode, next_business_day, IncotermCode, \
+from python_dhl.dhl import DHLService
+from python_dhl.resources import address, shipment
+from python_dhl.resources.helper import ProductCode, ShipmentType, TypeCode, next_business_day, IncotermCode, \
     MeasurementUnit, ShipperType
 
 
@@ -16,10 +15,10 @@ LOGO_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAoYAAAB5CAYAAACk0eCcAAABG2lUWHRYTUw6Y29tL
 
 class TestDhl(unittest.TestCase):
     def test_validate(self):
-        service = dhl.DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SECRET,
-                                 account_number=Setting.DHL_ACCOUNT_EXPORT,
-                                 import_account_number=Setting.DHL_ACCOUNT_IMPORT,
-                                 test_mode=True)
+        service = DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SECRET,
+                             account_number=Setting.DHL_ACCOUNT_EXPORT,
+                             import_account_number=Setting.DHL_ACCOUNT_IMPORT,
+                             test_mode=True)
 
         addr = address.DHLAddress(
             street_line1='Via Maestro Zampieri, 14',
@@ -37,10 +36,10 @@ class TestDhl(unittest.TestCase):
         self.assertTrue(validate.success)
 
     def test_shipment(self):
-        service = dhl.DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SECRET,
-                                 account_number=Setting.DHL_ACCOUNT_EXPORT,
-                                 import_account_number=Setting.DHL_ACCOUNT_IMPORT,
-                                 test_mode=True)
+        service = DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SECRET,
+                             account_number=Setting.DHL_ACCOUNT_EXPORT,
+                             import_account_number=Setting.DHL_ACCOUNT_IMPORT,
+                             test_mode=True)
 
         sender_contact = address.DHLContactInformation(
             company_name='Test Co.',
@@ -202,10 +201,10 @@ class TestDhl(unittest.TestCase):
         self.assertTrue(ship.success)
 
     def test_upload_document(self):
-        service = dhl.DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SECRET,
-                                 account_number=Setting.DHL_ACCOUNT_EXPORT,
-                                 import_account_number=Setting.DHL_ACCOUNT_IMPORT,
-                                 test_mode=True)
+        service = DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SECRET,
+                             account_number=Setting.DHL_ACCOUNT_EXPORT,
+                             import_account_number=Setting.DHL_ACCOUNT_IMPORT,
+                             test_mode=True)
 
         shipment_date = next_business_day()
         shipment_date = shipment_date.replace(hour=14, minute=0, second=0, microsecond=0)
