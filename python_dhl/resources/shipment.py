@@ -121,8 +121,11 @@ class DHLShipmentOutput:
 
 
 class DHLShipment:
+    """
+    Please enter DHL Express value added service code. For detailed list of all available service codes for your prospect shipment please invoke GET /products or GET /rates
+    """
     def __init__(self, sender_contact, sender_address, receiver_contact, receiver_address, ship_datetime,
-                 product_code, added_services, content, output_format, shipper_type,
+                 product_code, added_services, content, output_format, shipper_type, receiver_type,
                  account_type='shipper', customer_references=None, sender_registration_numbers=None,
                  request_pickup=False, pickup_close_time=None, pickup_location=None):
         self.sender_contact = sender_contact
@@ -141,6 +144,7 @@ class DHLShipment:
         self.output_format = output_format
         self.customer_references = customer_references
         self.shipper_type = shipper_type
+        self.receiver_type = receiver_type
 
 
 class DHLPickup:

@@ -11,12 +11,12 @@ class DHLResponse:
 
 
 class DHLShipmentResponse(DHLResponse):
-    def __init__(self, success, tracking_numbers=None, identification_number=None, dispatch_number=None,
+    def __init__(self, success, tracking_number=None, identification_number=None, dispatch_number=None,
                  documents_bytes=None, error_title=None, error_detail=None, additional_error_details=None,
                  message=None, status=None):
         DHLResponse.__init__(self, success, error_title, error_detail, additional_error_details)
 
-        self.tracking_numbers = tracking_numbers
+        self.tracking_number = tracking_number
         self.identification_number = identification_number
         self.dispatch_number = dispatch_number
         self.documents_bytes = documents_bytes
@@ -26,8 +26,9 @@ class DHLShipmentResponse(DHLResponse):
 
 class DHLPickupResponse(DHLResponse):
     def __init__(self, success, dispatch_confirmation_numbers=None, ready_by_time=None,
-                 next_pickup_date=None, warnings=None, status=None):
-        DHLResponse.__init__(self, success)
+                 next_pickup_date=None, error_title=None, error_detail=None, additional_error_details=None,
+                 warnings=None, status=None):
+        DHLResponse.__init__(self, success, error_title, error_detail, additional_error_details)
 
         self.dispatch_confirmation_numbers = dispatch_confirmation_numbers
         self.ready_by_time = ready_by_time
@@ -37,29 +38,29 @@ class DHLPickupResponse(DHLResponse):
 
 
 class DHLUploadResponse(DHLResponse):
-    def __init__(self, success, error_title=None, documents=None):
-        DHLResponse.__init__(self, success, error_title)
+    def __init__(self, success, error_title=None, error_detail=None, additional_error_details=None, documents=None):
+        DHLResponse.__init__(self, success, error_title, error_detail, additional_error_details)
 
         self.documents = documents
 
 
 class DHLTrackingResponse(DHLResponse):
-    def __init__(self, success, error_title=None, shipments=None):
-        DHLResponse.__init__(self, success, error_title)
+    def __init__(self, success, error_title=None, error_detail=None, additional_error_details=None, shipments=None):
+        DHLResponse.__init__(self, success, error_title, error_detail, additional_error_details)
 
         self.shipments = shipments
 
 
 class DHLRatesResponse(DHLResponse):
-    def __init__(self, success, error_title=None, products=None):
-        DHLResponse.__init__(self, success, error_title)
+    def __init__(self, success, error_title=None, error_detail=None, additional_error_details=None, products=None):
+        DHLResponse.__init__(self, success, error_title, error_detail, additional_error_details)
 
         self.products = products
 
 
 class DHLValidateAddressResponse(DHLResponse):
-    def __init__(self, success, error_title=None, warnings=None, address=None):
-        DHLResponse.__init__(self, success, error_title)
+    def __init__(self, success, error_title=None, error_detail=None, additional_error_details=None, warnings=None, address=None):
+        DHLResponse.__init__(self, success, error_title, error_detail, additional_error_details)
 
         self.warnings = warnings
         self.address = address

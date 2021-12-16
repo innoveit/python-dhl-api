@@ -4,7 +4,7 @@ import unittest
 from zoneinfo import ZoneInfo
 
 from config import Setting
-from python_dhl.dhl import DHLService
+from python_dhl.service import DHLService
 from python_dhl.resources import address, shipment
 from python_dhl.resources.helper import ProductCode, ShipmentType, TypeCode, next_business_day, IncotermCode, \
     MeasurementUnit, ShipperType
@@ -17,7 +17,6 @@ class TestDhl(unittest.TestCase):
     def test_validate(self):
         service = DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SECRET,
                              account_number=Setting.DHL_ACCOUNT_EXPORT,
-                             import_account_number=Setting.DHL_ACCOUNT_IMPORT,
                              test_mode=True)
 
         addr = address.DHLAddress(
@@ -38,7 +37,6 @@ class TestDhl(unittest.TestCase):
     def test_shipment(self):
         service = DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SECRET,
                              account_number=Setting.DHL_ACCOUNT_EXPORT,
-                             import_account_number=Setting.DHL_ACCOUNT_IMPORT,
                              test_mode=True)
 
         sender_contact = address.DHLContactInformation(
@@ -128,6 +126,7 @@ class TestDhl(unittest.TestCase):
             output_format=output,
             customer_references=customer_references,
             shipper_type=ShipperType.BUSINESS.value,
+            receiver_type=ShipperType.PRIVATE.value
         )
 
         ship = service.ship(dhl_shipment=s)
@@ -139,7 +138,7 @@ class TestDhl(unittest.TestCase):
             for e in ship.additional_error_details:
                 print(e)
         else:
-            print('Tracking numbers', ship.tracking_numbers)
+            print('Tracking numbers', ship.tracking_number)
             print('Labels', len(ship.documents_bytes))
         self.assertTrue(ship.success)
 
@@ -185,6 +184,7 @@ class TestDhl(unittest.TestCase):
             output_format=output,
             customer_references=customer_references,
             shipper_type=ShipperType.PRIVATE.value,
+            receiver_type=ShipperType.BUSINESS.value
         )
 
         ship = service.ship(dhl_shipment=s)
@@ -196,14 +196,13 @@ class TestDhl(unittest.TestCase):
             for e in ship.additional_error_details:
                 print(e)
         else:
-            print('Tracking numbers', ship.tracking_numbers)
+            print('Tracking numbers', ship.tracking_number)
             print('Labels', len(ship.documents_bytes))
         self.assertTrue(ship.success)
 
     def test_upload_document(self):
         service = DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SECRET,
                              account_number=Setting.DHL_ACCOUNT_EXPORT,
-                             import_account_number=Setting.DHL_ACCOUNT_IMPORT,
                              test_mode=True)
 
         shipment_date = next_business_day()

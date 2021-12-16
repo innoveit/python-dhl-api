@@ -18,11 +18,10 @@ class DHLService:
     dhl_endpoint = ''
     dhl_endpoint_test = 'https://express.api.dhl.com/mydhlapi/test'
 
-    def __init__(self, api_key, api_secret, account_number, import_account_number, test_mode=False):
+    def __init__(self, api_key, api_secret, account_number, test_mode=False):
         self.api_key = api_key
         self.api_secret = api_secret
         self.account_number = account_number
-        self.import_account_number = import_account_number
         self.test_mode = test_mode
         self.endpoint_url = self.dhl_endpoint_test if test_mode else self.dhl_endpoint
 
@@ -51,7 +50,8 @@ class DHLService:
         except Exception as err:
             return DHLValidateAddressResponse(
                 success=False,
-                error_title='No address found.'
+                error_title='No address found.',
+                error_detail=str(err)
             )
 
     def get_rates(self, sender, receiver, product, shipment_date, with_customs='false', unit_of_measurement='metric'):
@@ -83,7 +83,8 @@ class DHLService:
         except Exception as err:
             return DHLRatesResponse(
                 success=False,
-                error_title='No rates found.'
+                error_title='No rates found.',
+                error_detail=str(err)
             )
 
     def get_tracking(self, tracking_number):
@@ -100,7 +101,8 @@ class DHLService:
         except Exception as err:
             return DHLTrackingResponse(
                 success=False,
-                error_title='No shipments found.'
+                error_title='No shipments found.',
+                error_detail=str(err)
             )
 
     def check_shipment(self, tracking_number):
@@ -117,7 +119,8 @@ class DHLService:
         except Exception as err:
             return DHLUploadResponse(
                 success=False,
-                error_title='No electronic proof of delivery found.'
+                error_title='No electronic proof of delivery found.',
+                error_detail=str(err)
             )
 
     def ship(self, dhl_shipment):
@@ -127,6 +130,12 @@ class DHLService:
         :return:
         """
         try:
+            if not (dhl_shipment.ship_datetime.tzinfo is not None and dhl_shipment.ship_datetime.tzinfo.utcoffset(
+                    dhl_shipment.ship_datetime) is not None):
+                return DHLShipmentResponse(
+                    success=False,
+                    error_title='Ship date is not timezone aware.'
+                )
             shipment = self._create_shipment(dhl_shipment)
             dhl_response = requests.post(
                 self.endpoint_url + '/shipments', json=shipment,
@@ -161,23 +170,19 @@ class DHLService:
             else:
                 response = DHLShipmentResponse(
                     success=True,
-                    tracking_numbers=dhl_response.json()['shipmentTrackingNumber'],
+                    tracking_number=dhl_response.json()['shipmentTrackingNumber'],
                     documents_bytes=dhl_response.json()['documents'],
                 )
             return response
         except Exception as err:
             return DHLShipmentResponse(
                 success=False,
-                error_detail=['No label.']
+                error_title='Shipment error. No label.',
+                error_detail=str(err)
             )
 
     def _create_shipment(self, dhl_shipment):
-        next_day = datetime.strftime(dhl_shipment.ship_datetime, '%d/%m/%Y %H:%M')
-
-        ship_date = datetime.strptime(next_day, '%d/%m/%Y %H:%M')
-        ship_date = ship_date.replace(tzinfo=ZoneInfo('Europe/Rome'))
-
-        dhl_ship_date = datetime.strftime(ship_date, '%Y-%m-%dT%H:%M:%S GMT%z')
+        dhl_ship_date = datetime.strftime(dhl_shipment.ship_datetime, '%Y-%m-%dT%H:%M:%S GMT%z')
         dhl_ship_date = "{0}:{1}".format(
             dhl_ship_date[:-2],
             dhl_ship_date[-2:]
@@ -205,12 +210,12 @@ class DHLService:
                 "shipperDetails": {
                     "postalAddress": dhl_shipment.sender_address.to_dict(),
                     "contactInformation": dhl_shipment.sender_contact.to_dict(),
-                    "typeCode": "business"
+                    "typeCode": dhl_shipment.shipper_type
                 },
                 "receiverDetails": {
                     "postalAddress": dhl_shipment.receiver_address.to_dict(),
                     "contactInformation": dhl_shipment.receiver_contact.to_dict(),
-                    "typeCode": "private"
+                    "typeCode": dhl_shipment.receiver_type
                 },
             },
             "content": dhl_shipment.content.to_dict()
@@ -247,6 +252,12 @@ class DHLService:
 
     def pickup(self, dhl_pickup):
         try:
+            if not (dhl_pickup.pickup_datetime.tzinfo is not None and dhl_pickup.pickup_datetime.tzinfo.utcoffset(
+                    dhl_pickup.pickup_datetime) is not None):
+                return DHLPickupResponse(
+                    success=False,
+                    error_title='Pickup date is not timezone aware.'
+                )
             pickup = self._create_pickup(dhl_pickup)
             dhl_response = requests.post(
                 self.endpoint_url + '/pickups', json=pickup,
@@ -291,16 +302,13 @@ class DHLService:
             return response
         except Exception as err:
             return DHLPickupResponse(
-                success=False
+                success=False,
+                error_title='Pickup error. No label.',
+                error_detail=str(err)
             )
 
     def _create_pickup(self, dhl_pickup):
-        next_day = datetime.strftime(dhl_pickup.pickup_datetime, '%d/%m/%Y %H:%M')
-
-        ship_date = datetime.strptime(next_day, '%d/%m/%Y %H:%M')
-        ship_date = ship_date.replace(tzinfo=ZoneInfo('Europe/Rome'))
-
-        dhl_pickup_date = datetime.strftime(ship_date, '%Y-%m-%dT%H:%M:%S GMT%z')
+        dhl_pickup_date = datetime.strftime(dhl_pickup.pickup_datetime, '%Y-%m-%dT%H:%M:%S GMT%z')
         dhl_pickup_date = "{0}:{1}".format(
             dhl_pickup_date[:-2],
             dhl_pickup_date[-2:]
