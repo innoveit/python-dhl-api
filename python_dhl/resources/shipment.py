@@ -122,11 +122,21 @@ class DHLShipmentOutput:
 
 class DHLShipment:
     """
-    Please enter DHL Express value added service code. For detailed list of all available service codes for your prospect shipment please invoke GET /products or GET /rates
+    A class for creating a shipment.
+
+    For detailed list of all available service codes "added_services" for your prospect shipment use service.get_rates.
+    For instance:
+    Service "PT" if you do not know when they will be entrusted to DHL, they must be managed with the datastaging service.
+    Service "WY" (Paper Less Trade) in case of non-EEC countries because the declaration of free export and the invoice must also be loaded.
+
+    The "request_pickup" parameter must be set to false every time it is not necessary to notify the courier to pass,
+    so when you already have a notice for the same address, when you have a fixed agreement for which it passes every day
+    at a specific time or if the package is brought to a DHL service point / office.
+    If false it is not necessary to call the pickup service.
     """
     def __init__(self, sender_contact, sender_address, receiver_contact, receiver_address, ship_datetime,
-                 product_code, added_services, content, output_format, shipper_type, receiver_type,
-                 account_type='shipper', customer_references=None, sender_registration_numbers=None,
+                 product_code, added_services, content, output_format, account_type='shipper',
+                 customer_references=None, sender_registration_numbers=None,
                  request_pickup=False, pickup_close_time=None, pickup_location=None):
         self.sender_contact = sender_contact
         self.sender_address = sender_address
@@ -143,8 +153,6 @@ class DHLShipment:
         self.account_type = account_type
         self.output_format = output_format
         self.customer_references = customer_references
-        self.shipper_type = shipper_type
-        self.receiver_type = receiver_type
 
 
 class DHLPickup:

@@ -48,12 +48,22 @@ class TypeCode(Enum):
     MID = 'Manufacturer ID'
 
 
+class DocumentType(Enum):
+    INV = 'Invoice'
+    PNV = 'Proforma'
+    COO = 'Certificate of Origin'
+    NAF = 'Nafta Certificate of Origin'
+    CIN = 'Commercial Invoice'
+    DCL = 'Custom Declaration'
+    AWB = 'Air Waybill and Waybill Document'
+
+
 class ProductCode(Enum):
     """
-    Spedizioni ITALIA à DOM - N
-    Spedizioni EUROPA à ESU - W
-    Spedizioni SVIZZERA + REGNO UNITO à ESI - H (con dogana)
-    Spedizioni STATI UNITI + CANADA + GIAPPONE (+ EXTRA CEE)  à WPX - P (con dogana)
+    Domestic shipment: DOM - N
+    European shipment: ESU - W
+    Switzerland and the UK: ESI - H
+    USA, Canada, Japan and non-EEC countries: WPX - P
     """
     DOMESTIC = 'N'
     EUROPE = 'W'

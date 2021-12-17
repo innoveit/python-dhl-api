@@ -23,10 +23,11 @@ class DHLContactInformation:
     A class for creating the shipper and the recipient in the DHLShipment.
     """
 
-    def __init__(self, full_name, phone, company_name=None, mobile_phone=None, email=None):
+    def __init__(self, full_name, phone, contact_type, company_name=None, mobile_phone=None, email=None):
         self.company_name = company_name
         self.full_name = full_name
         self.phone = phone
+        self.contact_type = contact_type
         self.mobile_phone = mobile_phone
         self.email = email
 

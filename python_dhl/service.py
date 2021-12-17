@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 import requests
 from requests.auth import HTTPBasicAuth
 
+from python_dhl.resources.helper import MeasurementUnit
 from python_dhl.resources.response import DHLShipmentResponse, DHLPickupResponse, DHLResponse, DHLUploadResponse, \
     DHLTrackingResponse, DHLRatesResponse, DHLValidateAddressResponse
 
@@ -13,9 +14,9 @@ logger = logging.getLogger(__name__)
 
 class DHLService:
     """
-    Main class with static data and the main shipping methods.
+    Main class with static data and the main methods.
     """
-    dhl_endpoint = ''
+    dhl_endpoint = 'https://express.api.dhl.com/mydhlapi'
     dhl_endpoint_test = 'https://express.api.dhl.com/mydhlapi/test'
 
     def __init__(self, api_key, api_secret, account_number, test_mode=False):
@@ -26,6 +27,12 @@ class DHLService:
         self.endpoint_url = self.dhl_endpoint_test if test_mode else self.dhl_endpoint
 
     def validate_address(self, address, shipment_type):
+        """
+        Checks if an address is valid for a shipment
+        :param address: DHLAddress
+        :param shipment_type: ShipmentType
+        :return: DHLValidateAddressResponse
+        """
         try:
             params = {
                 'type': shipment_type,
@@ -54,8 +61,25 @@ class DHLService:
                 error_detail=str(err)
             )
 
-    def get_rates(self, sender, receiver, product, shipment_date, with_customs='false', unit_of_measurement='metric'):
+    def get_rates(self, sender, receiver, product, shipment_date, with_customs='false', unit_of_measurement=MeasurementUnit.METRIC.value):
+        """
+        Returns DHL's product capabilities and prices (where applicable)
+        This is also used to get a detailed list of all available service codes for a prospect shipment
+        :param sender: DHLPostalAddress
+        :param receiver: DHLPostalAddress
+        :param product: DHLProduct
+        :param shipment_date: Datetime timezone aware
+        :param with_customs: true/false as string
+        :param unit_of_measurement: MeasurementUnit
+        :return: DHLRatesResponse
+        """
         try:
+            if not (shipment_date.tzinfo is not None and shipment_date.tzinfo.utcoffset(
+                    shipment_date) is not None):
+                return DHLRatesResponse(
+                    success=False,
+                    error_title='Ship date is not timezone aware.'
+                )
             dhl_ship_date = datetime.strftime(shipment_date, '%Y-%m-%d')
             params = {
                 'accountNumber': self.account_number,
@@ -87,7 +111,11 @@ class DHLService:
                 error_detail=str(err)
             )
 
-    def get_tracking(self, tracking_number):
+    def get_shipment_status(self, tracking_number):
+        """
+        Returns all statuses given a tracking number
+        :param tracking_number: string
+        """
         try:
             dhl_response = requests.get(
                 self.endpoint_url + '/shipments' + str(tracking_number) + '/tracking',
@@ -106,6 +134,10 @@ class DHLService:
             )
 
     def check_shipment(self, tracking_number):
+        """
+        Returns all documents available given a tracking number
+        :param tracking_number: string
+        """
         try:
             dhl_response = requests.get(
                 self.endpoint_url + '/shipments' + str(tracking_number) + '/proof-of-delivery',
@@ -125,9 +157,9 @@ class DHLService:
 
     def ship(self, dhl_shipment):
         """
-        TODO
-        :param shipment: DHLShipment
-        :return:
+        Generates a shipping label and transmit shipment detail to DHL
+        :param dhl_shipment: DHLShipment
+        :return: DHLShipmentResponse
         """
         try:
             if not (dhl_shipment.ship_datetime.tzinfo is not None and dhl_shipment.ship_datetime.tzinfo.utcoffset(
@@ -195,7 +227,7 @@ class DHLService:
                 "pickupDetails": {
                     "postalAddress": dhl_shipment.sender_address.to_dict(),
                     "contactInformation": dhl_shipment.sender_contact.to_dict(),
-                    "typeCode": dhl_shipment.shipper_type
+                    "typeCode": dhl_shipment.sender_contact.contact_type
                 },
             },
             "productCode": dhl_shipment.product_code,
@@ -210,12 +242,12 @@ class DHLService:
                 "shipperDetails": {
                     "postalAddress": dhl_shipment.sender_address.to_dict(),
                     "contactInformation": dhl_shipment.sender_contact.to_dict(),
-                    "typeCode": dhl_shipment.shipper_type
+                    "typeCode": dhl_shipment.sender_contact.contact_type
                 },
                 "receiverDetails": {
                     "postalAddress": dhl_shipment.receiver_address.to_dict(),
                     "contactInformation": dhl_shipment.receiver_contact.to_dict(),
-                    "typeCode": dhl_shipment.receiver_type
+                    "typeCode": dhl_shipment.receiver_contact.contact_type
                 },
             },
             "content": dhl_shipment.content.to_dict()
@@ -251,6 +283,11 @@ class DHLService:
         return json_data
 
     def pickup(self, dhl_pickup):
+        """
+        Creates a DHL Express pickup booking request
+        :param dhl_pickup: DHLPickup
+        :return: DHLShipmentResponse
+        """
         try:
             if not (dhl_pickup.pickup_datetime.tzinfo is not None and dhl_pickup.pickup_datetime.tzinfo.utcoffset(
                     dhl_pickup.pickup_datetime) is not None):
@@ -333,8 +370,19 @@ class DHLService:
 
         return json_data
 
-    def upload_customs_document(self, dhl_document):
+    def upload_document(self, dhl_document):
+        """
+        Uploads updated customs documentation for your DHL Express shipment that has not been picked up yet
+        :param dhl_document: DHLDocument
+        :return: DHLResponse
+        """
         try:
+            if not (dhl_document.original_planned_shipping_date.tzinfo is not None and dhl_document.original_planned_shipping_date.tzinfo.utcoffset(
+                    dhl_document.original_planned_shipping_date) is not None):
+                return DHLResponse(
+                    success=False,
+                    error_title='Ship date is not timezone aware.'
+                )
             original_planned_shipping_date = datetime.strftime(dhl_document.original_planned_shipping_date, '%Y-%m-%d')
             document_data = {
                 "shipmentTrackingNumber": dhl_document.tracking_number,
@@ -366,5 +414,6 @@ class DHLService:
             return response
         except Exception as err:
             return DHLResponse(
-                success=False
+                success=False,
+                error_title=str(err)
             )
