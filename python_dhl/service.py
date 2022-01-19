@@ -399,8 +399,8 @@ class DHLService:
                 document_images = []
                 for d in dhl_document.document_images:
                     document_images.append(d.to_dict())
-                document_data['document_images'] = document_images
-            dhl_response = requests.post(
+                document_data['documentImages'] = document_images
+            dhl_response = requests.patch(
                 self.endpoint_url + '/shipments/' + dhl_document.tracking_number + '/upload-image',
                 json=document_data,
                 auth=HTTPBasicAuth(self.api_key, self.api_secret)
