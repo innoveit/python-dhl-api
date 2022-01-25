@@ -34,14 +34,14 @@ Check test_validate.py to see how to use each service.
 
 
 ## Create a shipment
-```
+```py
 service = DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SECRET,
                      account_number=Setting.DHL_ACCOUNT_EXPORT,
                      test_mode=True)
 ```
 
 Create the sender:
-```
+```py
 sender_contact = address.DHLContactInformation(
     company_name='Test Co.',
     full_name='Name and surname',
@@ -64,7 +64,7 @@ registration_numbers = [address.DHLRegistrationNumber(
 ```
 
 Create the receiver:
-```
+```py
 receiver_contact = address.DHLContactInformation(
     full_name='Customer',
     phone='+39000000000',
@@ -80,7 +80,7 @@ receiver_address = address.DHLPostalAddress(
 ```
 
 Add the packages to ship:
-```
+```py
 packages = [shipment.DHLProduct(
     weight=1,
     length=35,
@@ -90,7 +90,7 @@ packages = [shipment.DHLProduct(
 ```
 
 Set content and label output. For a list of services you are entitled to, use service get_rates.
-```
+```py
 shipment_date = next_business_day()
 shipment_date = shipment_date.replace(hour=14, minute=0, second=0, microsecond=0)
 shipment_date = shipment_date.replace(tzinfo=ZoneInfo('Europe/Rome'))
@@ -119,7 +119,7 @@ customer_references = ['id1', 'id2']
 ```
 
 Let's ship:
-```
+```py
 s = shipment.DHLShipment(
     sender_contact=sender_contact,
     sender_address=sender_address,
