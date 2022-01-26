@@ -1,4 +1,6 @@
 # python-dhl-api
+[![PyPI version](https://badge.fury.io/py/python-dhl-api.svg)](https://badge.fury.io/py/python-dhl-api)
+
 A Django module to integrate with DHL EXPRESS API (MyDHL API).
 
 DHL APIs documentation: https://developer.dhl.com/api-reference/dhl-express-mydhl-api#reference-docs-section/
