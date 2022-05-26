@@ -231,12 +231,6 @@ class DHLService:
                 },
             },
             "productCode": dhl_shipment.product_code,
-            "accounts": [
-                {
-                    "typeCode": dhl_shipment.account_type,
-                    "number": self.account_number
-                }
-            ],
             "outputImageProperties": dhl_shipment.output_format.to_dict(),
             "customerDetails": {
                 "shipperDetails": {
@@ -252,6 +246,11 @@ class DHLService:
             },
             "content": dhl_shipment.content.to_dict()
         }
+
+        accounts = []
+        for a in dhl_shipment.accounts:
+            accounts.append(a.to_dict())
+        json_data['accounts'] = accounts
 
         if dhl_shipment.pickup_close_time:
             json_data['pickup']['closeTime'] = dhl_shipment.pickup_close_time
@@ -353,12 +352,6 @@ class DHLService:
 
         json_data = {
             "plannedPickupDateAndTime": dhl_pickup_date,
-            "accounts": [
-                {
-                    "typeCode": dhl_pickup.account_type,
-                    "number": self.account_number
-                }
-            ],
             "customerDetails": {
                 "shipperDetails": {
                     "postalAddress": dhl_pickup.sender_address.to_dict(),
@@ -367,6 +360,11 @@ class DHLService:
             },
             "shipmentDetails": [dhl_pickup.content.to_dict_pickup()]
         }
+
+        accounts = []
+        for a in dhl_pickup.accounts:
+            accounts.append(a.to_dict())
+        json_data['accounts'] = accounts
 
         return json_data
 
@@ -388,13 +386,13 @@ class DHLService:
                 "shipmentTrackingNumber": dhl_document.tracking_number,
                 "originalPlannedShippingDate": original_planned_shipping_date,
                 "productCode": dhl_document.product_code,
-                "accounts": [
-                    {
-                        "typeCode": dhl_document.account_type,
-                        "number": self.account_number
-                    }
-                ],
             }
+
+            accounts = []
+            for a in dhl_document.accounts:
+                accounts.append(a.to_dict())
+            document_data['accounts'] = accounts
+
             if dhl_document.document_images:
                 document_images = []
                 for d in dhl_document.document_images:

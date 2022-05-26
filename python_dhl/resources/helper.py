@@ -12,6 +12,17 @@ class ShipmentType(Enum):
     PICKUP = 'pickup'
 
 
+class AccountType(Enum):
+    """
+    shipper: your account code, who is requesting the shipment
+    payer: an account code different from yours if the shipment is paid by someone different (for example the recipient)
+    duties-taxes: an account code if the customs duties are paid by someone different from the recipient
+    """
+    SHIPPER = 'shipper'
+    PAYER = 'payer'
+    DUTIES_TAXES = 'duties-taxes'
+
+
 class ShipperType(Enum):
     BUSINESS = 'business'
     DIRECT_CONSUMER = 'direct_consumer'

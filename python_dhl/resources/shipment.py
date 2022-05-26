@@ -23,7 +23,29 @@ class DHLDangerousGood:
         self.un_code = un_code
 
 
+class DHLAccountType:
+    def __init__(self, type_code, number):
+        self.type_code = type_code
+        self.number = number
+
+    def to_dict(self):
+        dict = {
+            'typeCode': self.type_code.value,
+            'number': self.number,
+        }
+        return dict
+
+
 class DHLAddedService:
+    """
+    This section adds shipping services, such as Insurance (or Shipment Value Protection).
+    For detailed list of all available service codes "added_services" for your prospect shipment use service.get_rates.
+    For instance:
+    "PT" if you do not know when they will be entrusted to DHL, they must be managed with the datastaging service.
+    "WY" (Paper Less Trade) in case of non-EEC countries because the declaration of free export and the invoice must also be loaded.
+    "DD" (DTP service) commonly referred to as Duties and Taxes Paid (DTP) indicates that the shipper or account holder incurs the full costs of the shipment, including any duties or taxes that might be incurred from customs.
+    "DU" (IOR service) the official importer of the shipment, meaning that duties, taxes, or any other payments will go through the IOR, but the end destination of the shipment will go to the receiver, who doesn’t have to pay for a thing.
+    """
     def __init__(self, service_code, value=None, currency=None, method=None, dangerous_goods=None):
         self.service_code = service_code
         self.value = value
@@ -126,8 +148,10 @@ class DHLShipment:
 
     For detailed list of all available service codes "added_services" for your prospect shipment use service.get_rates.
     For instance:
-    Service "PT" if you do not know when they will be entrusted to DHL, they must be managed with the datastaging service.
-    Service "WY" (Paper Less Trade) in case of non-EEC countries because the declaration of free export and the invoice must also be loaded.
+    "PT" if you do not know when they will be entrusted to DHL, they must be managed with the datastaging service.
+    "WY" (Paper Less Trade) in case of non-EEC countries because the declaration of free export and the invoice must also be loaded.
+    "DD" (DTP service) commonly referred to as Duties and Taxes Paid (DTP) indicates that the shipper or account holder incurs the full costs of the shipment, including any duties or taxes that might be incurred from customs.
+    "DU" (IOR service) the official importer of the shipment, meaning that duties, taxes, or any other payments will go through the IOR, but the end destination of the shipment will go to the receiver, who doesn’t have to pay for a thing.
 
     The "request_pickup" parameter must be set to false every time it is not necessary to notify the courier to pass,
     so when you already have a notice for the same address, when you have a fixed agreement for which it passes every day
@@ -135,7 +159,7 @@ class DHLShipment:
     If false it is not necessary to call the pickup service.
     """
     def __init__(self, sender_contact, sender_address, receiver_contact, receiver_address, ship_datetime,
-                 product_code, added_services, content, output_format, account_type='shipper',
+                 product_code, added_services, content, output_format, accounts,
                  customer_references=None, sender_registration_numbers=None,
                  request_pickup=False, pickup_close_time=None, pickup_location=None):
         self.sender_contact = sender_contact
@@ -150,14 +174,14 @@ class DHLShipment:
         self.request_pickup = request_pickup
         self.pickup_close_time = pickup_close_time
         self.pickup_location = pickup_location
-        self.account_type = account_type
+        self.accounts = accounts
         self.output_format = output_format
         self.customer_references = customer_references
 
 
 class DHLPickup:
     def __init__(self, sender_contact, sender_address, receiver_contact, receiver_address, pickup_datetime,
-                 content, account_type='shipper', sender_registration_numbers=None):
+                 content, accounts, sender_registration_numbers=None):
         self.sender_contact = sender_contact
         self.sender_address = sender_address
         self.sender_registration_numbers = sender_registration_numbers
@@ -165,7 +189,7 @@ class DHLPickup:
         self.receiver_address = receiver_address
         self.pickup_datetime = pickup_datetime
         self.content = content
-        self.account_type = account_type
+        self.accounts = accounts
 
 
 class DHLDocumentImage:
@@ -183,9 +207,9 @@ class DHLDocumentImage:
 
 
 class DHLDocument:
-    def __init__(self, tracking_number, original_planned_shipping_date, product_code, document_images, account_type='shipper'):
+    def __init__(self, tracking_number, original_planned_shipping_date, product_code, document_images, accounts):
         self.tracking_number = tracking_number
         self.original_planned_shipping_date = original_planned_shipping_date
         self.product_code = product_code
         self.document_images = document_images
-        self.account_type = account_type
+        self.accounts = accounts

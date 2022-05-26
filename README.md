@@ -25,7 +25,7 @@ DHL_ACCOUNT_EXPORT = ''
 ```
 
 ## Services available
-Check test_validate.py to see how to use each service.
+Please check test_validate.py to see some practical uses.
 1. Address validation
 2. Get rates and services available
 3. Create a shipment
@@ -40,6 +40,21 @@ Check test_validate.py to see how to use each service.
 service = DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SECRET,
                      account_number=Setting.DHL_ACCOUNT_EXPORT,
                      test_mode=True)
+```
+
+Set one or more the accounts:
+```py
+accounts = [
+    shipment.DHLAccountType(type_code=AccountType.SHIPPER, number=Setting.DHL_ACCOUNT_EXPORT),
+]
+```
+If you want the shipper to pay also the duties then:
+
+```py
+accounts = [
+    shipment.DHLAccountType(type_code=AccountType.SHIPPER, number=Setting.DHL_ACCOUNT_EXPORT),
+    shipment.DHLAccountType(type_code=AccountType.DUTIES_TAXES, number=Setting.DHL_ACCOUNT_EXPORT),
+]
 ```
 
 Create the sender:
@@ -123,6 +138,7 @@ customer_references = ['id1', 'id2']
 Let's ship:
 ```py
 s = shipment.DHLShipment(
+    accounts=accounts,
     sender_contact=sender_contact,
     sender_address=sender_address,
     sender_registration_numbers=registration_numbers,
