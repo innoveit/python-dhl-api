@@ -42,7 +42,7 @@ service = DHLService(api_key=Setting.DHL_API_KEY, api_secret=Setting.DHL_API_SEC
                      test_mode=True)
 ```
 
-Set one or more the accounts:
+Set one or more accounts:
 ```py
 accounts = [
     shipment.DHLAccountType(type_code=AccountType.SHIPPER, number=Setting.DHL_ACCOUNT_EXPORT),
