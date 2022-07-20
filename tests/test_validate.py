@@ -265,7 +265,7 @@ class TestDhl(unittest.TestCase):
         self.assertTrue(rates.success)
 
         added_service = [
-            shipment.DHLAddedService(service_code='WY'),
+            shipment.DHLAddedService(service_code='PK'),  # it specifies that documents are uploaded after the shipment
             shipment.DHLAddedService(service_code='DD'),  # it specifies that duties are paid by the sender
         ]
 

@@ -43,6 +43,7 @@ class DHLAddedService:
     For instance:
     "PT" if you do not know when they will be entrusted to DHL, they must be managed with the datastaging service.
     "WY" (Paper Less Trade) in case of non-EEC countries because the declaration of free export and the invoice must also be loaded.
+    "PK" (Deferred Image Acquisition o Deferred Paperless) as WY but if documents are uploaded after the shipment.
     "DD" (DTP service) commonly referred to as Duties and Taxes Paid (DTP) indicates that the shipper or account holder incurs the full costs of the shipment, including any duties or taxes that might be incurred from customs.
     "DU" (IOR service) the official importer of the shipment, meaning that duties, taxes, or any other payments will go through the IOR, but the end destination of the shipment will go to the receiver, who doesn’t have to pay for a thing.
     """
@@ -150,6 +151,7 @@ class DHLShipment:
     For instance:
     "PT" if you do not know when they will be entrusted to DHL, they must be managed with the datastaging service.
     "WY" (Paper Less Trade) in case of non-EEC countries because the declaration of free export and the invoice must also be loaded.
+    "PK" (Deferred Image Acquisition o Deferred Paperless) as WY but if documents are uploaded after the shipment.
     "DD" (DTP service) commonly referred to as Duties and Taxes Paid (DTP) indicates that the shipper or account holder incurs the full costs of the shipment, including any duties or taxes that might be incurred from customs.
     "DU" (IOR service) the official importer of the shipment, meaning that duties, taxes, or any other payments will go through the IOR, but the end destination of the shipment will go to the receiver, who doesn’t have to pay for a thing.
 
