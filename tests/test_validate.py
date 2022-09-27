@@ -94,7 +94,7 @@ class TestDhl(unittest.TestCase):
         self.assertTrue(rates.success)
 
         added_service = [shipment.DHLAddedService(
-            service_code='W'
+            service_code='PT'
         )]
 
         content = shipment.DHLShipmentContent(
@@ -412,6 +412,8 @@ class TestDhl(unittest.TestCase):
         upload = service.upload_document(document)
         print('\n+++++++++++++++++++++++')
         print('Upload success: ', upload.success)
+        if upload.error_title:
+            print('Error title: ', upload.error_title)
         self.assertTrue(upload.success)
 
         check = service.check_shipment('1256929634')
