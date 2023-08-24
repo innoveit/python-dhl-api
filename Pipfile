@@ -7,6 +7,7 @@ name = "pypi"
 requests = "*"
 build = "*"
 twine = "*"
+certifi = ">=2023.7.22"
 
 [dev-packages]
 
