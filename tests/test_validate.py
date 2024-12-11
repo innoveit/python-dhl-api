@@ -147,6 +147,7 @@ class TestDhl(unittest.TestCase):
             content=content,
             output_format=output,
             customer_references=customer_references,
+            # request_pickup=True,
         )
 
         ship = service.ship(dhl_shipment=s)
@@ -159,6 +160,7 @@ class TestDhl(unittest.TestCase):
                 print(e)
         else:
             print("Tracking numbers", ship.tracking_number)
+            print("Dispatch confirmation number", ship.dispatch_confirmation_number)
             print("Labels", len(ship.documents_bytes))
         self.assertTrue(ship.success)
 

@@ -221,11 +221,21 @@ class DHLService:
                     status=status,
                 )
             else:
-                response = DHLShipmentResponse(
-                    success=True,
-                    tracking_number=dhl_response.json()["shipmentTrackingNumber"],
-                    documents_bytes=dhl_response.json()["documents"],
-                )
+                if "dispatchConfirmationNumber" in dhl_response.json():
+                    response = DHLShipmentResponse(
+                        success=True,
+                        tracking_number=dhl_response.json()["shipmentTrackingNumber"],
+                        documents_bytes=dhl_response.json()["documents"],
+                        dispatch_confirmation_number=dhl_response.json()[
+                            "dispatchConfirmationNumber"
+                        ],
+                    )
+                else:
+                    response = DHLShipmentResponse(
+                        success=True,
+                        tracking_number=dhl_response.json()["shipmentTrackingNumber"],
+                        documents_bytes=dhl_response.json()["documents"],
+                    )
             return response
         except Exception as err:
             return DHLShipmentResponse(

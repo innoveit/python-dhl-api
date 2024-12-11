@@ -150,6 +150,7 @@ s = shipment.DHLShipment(
     content=content,
     output_format=output,
     customer_references=customer_references,
+    request_pickup=False
 )
 
 ship = service.ship(dhl_shipment=s)
