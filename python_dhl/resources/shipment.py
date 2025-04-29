@@ -82,6 +82,7 @@ class DHLShipmentContent:
         unit_of_measurement,
         declared_value=None,
         declared_value_currency=None,
+        export_declaration=None,
         product_code=None,
     ):
         self.packages = packages
@@ -91,6 +92,7 @@ class DHLShipmentContent:
         self.unit_of_measurement = unit_of_measurement
         self.declared_value = declared_value
         self.declared_value_currency = declared_value_currency
+        self.export_declaration = export_declaration
         self.product_code = product_code
 
     def to_dict(self):
@@ -270,3 +272,75 @@ class DHLDocument:
         self.product_code = product_code
         self.document_images = document_images
         self.accounts = accounts
+
+
+class DHLLineItem:
+    def __init__(
+        self,
+        number,
+        description,
+        price,
+        quantity_value,
+        quantity_unit,
+        manufacturer_country,
+        net_weight,
+        gross_weight,
+        commodity_codes=None,  # Optional parameter
+    ):
+        self.number = number
+        self.description = description
+        self.price = price
+        self.quantity_value = quantity_value
+        self.quantity_unit = quantity_unit
+        self.manufacturer_country = manufacturer_country
+        self.net_weight = net_weight
+        self.gross_weight = gross_weight
+        self.commodity_codes = commodity_codes  # Should be a list of dicts, or None
+
+    def to_dict(self):
+        data = {
+            "number": self.number,
+            "description": self.description,
+            "price": self.price,
+            "quantity": {
+                "value": self.quantity_value,
+                "unitOfMeasurement": self.quantity_unit,
+            },
+            "manufacturerCountry": self.manufacturer_country,
+            "weight": {
+                "netValue": self.net_weight,
+                "grossValue": self.gross_weight,
+            },
+        }
+
+        if self.commodity_codes:
+            data["commodityCodes"] = self.commodity_codes
+
+        return data
+
+
+class DHLExportDeclaration:
+    def __init__(
+        self,
+        line_items,
+        invoice_number,
+        invoice_date,
+        terms_of_payment,
+        export_reason_type,
+    ):
+        self.line_items = line_items  # List of DHLLineItem
+        self.invoice_number = invoice_number
+        self.invoice_date = invoice_date
+        self.terms_of_payment = terms_of_payment
+        self.export_reason_type = export_reason_type
+
+    def to_dict(self):
+        return {
+            "lineItems": [item.to_dict() for item in self.line_items],
+            "invoice": {
+                "number": self.invoice_number,
+                "date": self.invoice_date,
+                "termsOfPayment": self.terms_of_payment,
+            },
+            "exportReasonType": self.export_reason_type,
+        }

@@ -297,6 +297,41 @@ class TestDhl(unittest.TestCase):
             ),  # it specifies that duties are paid by the sender
         ]
 
+        # Create line items
+        line_items = [
+            shipment.DHLLineItem(
+                number=1,
+                description="Line 1",
+                price=5.10,
+                quantity_value=1,
+                quantity_unit="PCS",
+                manufacturer_country="IT",
+                net_weight=0.01,
+                gross_weight=0.01,
+                commodity_codes=[{"typeCode": "outbound", "value": 851713}],
+            ),
+            shipment.DHLLineItem(
+                number=2,
+                description="Line 2",
+                price=4.90,
+                quantity_value=1,
+                quantity_unit="PCS",
+                manufacturer_country="IT",
+                net_weight=0.03,
+                gross_weight=0.03,
+                commodity_codes=[{"typeCode": "outbound", "value": 1234.56}],
+            ),
+        ]
+
+        # Create export declaration
+        export_declaration = shipment.DHLExportDeclaration(
+            line_items=line_items,
+            invoice_number="FAT12345678",
+            invoice_date="2025-04-28",
+            terms_of_payment="DAP",
+            export_reason_type="permanent",
+        )
+
         content = shipment.DHLShipmentContent(
             packages=packages,
             is_custom_declarable=True,
@@ -306,6 +341,7 @@ class TestDhl(unittest.TestCase):
             incoterm_code=IncotermCode.DAP.name,
             unit_of_measurement=MeasurementUnit.METRIC.value,
             product_code=ProductCode.EUROPE.value,
+            export_declaration=export_declaration,  # Pass the export declaration here
         )
 
         output = shipment.DHLShipmentOutput(
