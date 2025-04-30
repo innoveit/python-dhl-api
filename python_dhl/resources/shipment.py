@@ -110,6 +110,8 @@ class DHLShipmentContent:
             dict["declaredValue"] = self.declared_value
         if self.declared_value_currency:
             dict["declaredValueCurrency"] = self.declared_value_currency
+        if self.export_declaration:
+            dict["exportDeclaration"] = self.export_declaration.to_dict()
         return dict
 
     def to_dict_pickup(self):

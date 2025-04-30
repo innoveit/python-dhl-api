@@ -308,7 +308,7 @@ class TestDhl(unittest.TestCase):
                 manufacturer_country="IT",
                 net_weight=0.01,
                 gross_weight=0.01,
-                commodity_codes=[{"typeCode": "outbound", "value": 851713}],
+                commodity_codes=[{"typeCode": "outbound", "value": "851713"}],
             ),
             shipment.DHLLineItem(
                 number=2,
@@ -319,7 +319,7 @@ class TestDhl(unittest.TestCase):
                 manufacturer_country="IT",
                 net_weight=0.03,
                 gross_weight=0.03,
-                commodity_codes=[{"typeCode": "outbound", "value": 1234.56}],
+                commodity_codes=[{"typeCode": "outbound", "value": "1234.56"}],
             ),
         ]
 
@@ -370,7 +370,6 @@ class TestDhl(unittest.TestCase):
             output_format=output,
             customer_references=customer_references,
         )
-
         ship = service.ship(dhl_shipment=s)
         print("\n+++++++++++++++++++++++")
         print("Ship success with customs: ", ship.success)
