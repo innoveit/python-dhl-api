@@ -321,6 +321,18 @@ class DHLLineItem:
         return data
 
 
+class DHLAdditionalCharge:
+    def __init__(self, type_code, value):
+        self.type_code = type_code
+        self.value = value
+
+    def to_dict(self):
+        return {
+            "typeCode": self.type_code,
+            "value": self.value,
+        }
+
+
 class DHLExportDeclaration:
     def __init__(
         self,
@@ -329,15 +341,17 @@ class DHLExportDeclaration:
         invoice_date,
         terms_of_payment,
         export_reason_type,
+        additional_charges=None,
     ):
         self.line_items = line_items  # List of DHLLineItem
         self.invoice_number = invoice_number
         self.invoice_date = invoice_date
         self.terms_of_payment = terms_of_payment
         self.export_reason_type = export_reason_type
+        self.additional_charges = additional_charges
 
     def to_dict(self):
-        return {
+        data = {
             "lineItems": [item.to_dict() for item in self.line_items],
             "invoice": {
                 "number": self.invoice_number,
@@ -346,3 +360,8 @@ class DHLExportDeclaration:
             },
             "exportReasonType": self.export_reason_type,
         }
+        if self.additional_charges:
+            data["additionalCharges"] = [
+                charge.to_dict() for charge in self.additional_charges
+            ]
+        return data
