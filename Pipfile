@@ -8,6 +8,7 @@ requests = "*"
 build = "*"
 twine = "*"
 certifi = ">=2024.7.04"
+urllib3 = ">=2.6.1"
 
 [dev-packages]
 
