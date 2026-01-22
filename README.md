@@ -6,7 +6,7 @@ A Django module to integrate with DHL EXPRESS API (MyDHL API).
 DHL APIs documentation: https://developer.dhl.com/api-reference/dhl-express-mydhl-api#reference-docs-section/
 
 ## Requirements
-Python 3.9+
+Python 3.12+
 
 ## Installation
 Python DHL API is available through pip. To easily install or upgrade it, do
@@ -33,6 +33,9 @@ Please check test_validate.py to see some practical uses.
 5. Upload document
 6. Check shipment
 7. Shipment status
+
+### Notes
+Use https://dct.dhl.com/ and enter the pickup origin and delivery destination to see all available services. If no service is listed, it is likely unavailable or temporarily suspended.
 
 
 ## Create a shipment

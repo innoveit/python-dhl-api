@@ -8,9 +8,9 @@ requests = "*"
 build = "*"
 twine = "*"
 certifi = ">=2024.7.04"
-urllib3 = ">=2.6.1"
+urllib3 = ">=2.6.2"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3.12"
