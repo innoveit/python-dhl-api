@@ -66,15 +66,15 @@ sender_contact = address.DHLContactInformation(
     company_name='Test Co.',
     full_name='Name and surname',
     phone='+39000000000',
-    email='matteo.munaretto@innove.it',
+    email='name.surname@example.com',
     contact_type=ShipperType.BUSINESS.value
 )
 sender_address = address.DHLPostalAddress(
-    street_line1='Via Maestro Zampieri, 14',
-    postal_code='36016',
-    province_code='VI',
+    street_line1='123 Example St',
+    postal_code='12345',
+    province_code='EX',
     country_code='IT',
-    city_name='Thiene',
+    city_name='Exampletown',
 )
 registration_numbers = [address.DHLRegistrationNumber(
     type_code=TypeCode.VAT.name,
@@ -88,14 +88,14 @@ Create the receiver:
 receiver_contact = address.DHLContactInformation(
     full_name='Customer',
     phone='+39000000000',
-    email='matteo.munaretto@innove.it',
+    email='customer@example.com',
     contact_type=ShipperType.PRIVATE.value
 )
 receiver_address = address.DHLPostalAddress(
-    street_line1='Rue Poncelet, 17',
-    postal_code='75017',
+    street_line1='456 Sample Ave',
+    postal_code='54321',
     country_code='FR',
-    city_name='Paris',
+    city_name='Sampleville',
 )
 ```
 
